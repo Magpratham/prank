@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Birthday Prank 🎉</title>
+  <style>
+    :root {
+      --main-font-size: 6vw;
+      --emoji-size: 18vw;
+      --text-padding: 5vw;
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --main-font-size: 4vw;
+        --emoji-size: 12vw;
+        --text-padding: 4vw;
+      }
+    }
+
+    @media (min-width: 900px) {
+      :root {
+        --main-font-size: 3vw;
+        --emoji-size: 8vw;
+        --text-padding: 3vw;
+      }
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      color: white;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      touch-action: manipulation;
+    }
+
+    #app {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      font-size: var(--main-font-size);
+      padding: var(--text-padding);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: black;
+      z-index: 999;
+    }
+
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      font-size: 1.5em;
+      animation: fall linear infinite;
+      color: white;
+      z-index: 5;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh);
+        opacity: 0;
+      }
+    }
+
+    .firework {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: gold;
+      animation: explode 1s ease-out forwards;
+      z-index: 6;
+    }
+
+    @keyframes explode {
+      0% { transform: scale(1); }
+      100% { transform: scale(10); opacity: 0; }
+    }
+
+    .glow-text {
+      font-size: calc(var(--main-font-size) * 1.2);
+      color: #fff;
+      text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff00ff; }
+      to { text-shadow: 0 0 30px #ff00ff; }
+    }
+
+    .emoji {
+      font-size: var(--emoji-size);
+      opacity: 0;
+      animation: emojiShow 1s ease forwards;
+    }
+
+    @keyframes emojiShow {
+      to { opacity: 1; transform: scale(1.2); }
+    }
+
+    .gift {
+      width: 22vw;
+      height: 22vw;
+      max-width: 160px;
+      max-height: 160px;
+      background: #ff69b4;
+      margin: auto;
+      border-radius: 10px;
+      cursor: pointer;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">Let’s start a fun (annoying) game! Tap the screen when you see the 🐸</div>
+
+  <video
+    id="birthdayVideo"
+    class="hidden"
+    playsinline
+    webkit-playsinline
+    muted
+    preload="auto"
+    src="sounds/video.mp4"
+  ></video>
+
+  <audio id="birthdayAudio" src="sounds/happy.mp3" loop></audio>
+  <audio id="hahaAudio" src="sounds/haha.mp3"></audio>
+
+  <script>
+    const app = document.getElementById('app');
+    const video = document.getElementById('birthdayVideo');
+    const audio = document.getElementById('birthdayAudio');
+    const hahaAudio = document.getElementById('hahaAudio');
+
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function prankGame() {
+      app.innerHTML = '';
+      const frog = document.createElement('div');
+      frog.textContent = '🐸';
+      frog.style.fontSize = '20vw';
+      frog.style.cursor = 'pointer';
+      frog.style.position = 'absolute';
+
+      function moveFrog() {
+        frog.style.top = `${Math.random() * 80}vh`;
+        frog.style.left = `${Math.random() * 80}vw`;
+      }
+
+      frog.onclick = () => {
+        moveFrog();
+      };
+
+      app.appendChild(frog);
+      moveFrog();
+      await sleep(60000);
+      app.innerHTML = '';
+      await sleep(3000);
+    }
+
+    async function playVideo() {
+      return new Promise((resolve) => {
+        video.classList.remove('hidden');
+        video.muted = false;
+
+        const requestFullscreen = () => {
+          const el = video;
+          if (el.requestFullscreen) el.requestFullscreen();
+          else if (el.webkitEnterFullscreen) el.webkitEnterFullscreen();
+          else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+          else if (el.msRequestFullscreen) el.msRequestFullscreen();
+        };
+
+        const playAndFullscreen = () => {
+          video.play()
+            .then(() => requestFullscreen())
+            .catch(() => {
+              app.innerHTML = "<div class='glow-text'>Tap to play fullscreen</div>";
+              app.onclick = () => {
+                video.play();
+                requestFullscreen();
+                app.innerHTML = '';
+              };
+            });
+        };
+
+        playAndFullscreen();
+
+        video.onended = () => {
+          video.classList.add('hidden');
+          resolve();
+        };
+
+        setTimeout(() => {
+          video.classList.add('hidden');
+          resolve();
+        }, 60000);
+      });
+    }
+
+    async function birthdayCelebrate() {
+      app.innerHTML = '';
+      audio.play();
+
+      const snowflakes = Array.from({ length: 30 }).map(() => {
+        const snow = document.createElement('div');
+        snow.className = 'snowflake';
+        snow.textContent = '❄️';
+        snow.style.left = `${Math.random() * 100}vw`;
+        snow.style.animationDuration = `${Math.random() * 5 + 2}s`;
+        document.body.appendChild(snow);
+        return snow;
+      });
+
+      function makeFirework() {
+        const f = document.createElement('div');
+        f.className = 'firework';
+        f.style.top = `${Math.random() * 80}vh`;
+        f.style.left = `${Math.random() * 80}vw`;
+        document.body.appendChild(f);
+        setTimeout(() => f.remove(), 1000);
+      }
+
+      const cake = document.createElement('div');
+      cake.innerHTML = '🎂 Happy Birthday!';
+      cake.className = 'glow-text';
+      app.appendChild(cake);
+
+      const fireworks = setInterval(makeFirework, 300);
+      await sleep(30000);
+      clearInterval(fireworks);
+      snowflakes.forEach(s => s.remove());
+      app.innerHTML = '';
+      audio.pause();
+      await sleep(5000);
+    }
+
+    async function showEmojis() {
+      const emojis = ['😂', '😢', '😡', '😱', '🤯'];
+      for (let emoji of emojis) {
+        app.innerHTML = `<div class="emoji">${emoji}</div>`;
+        await sleep(1000);
+      }
+      app.innerHTML = '';
+      await sleep(5000);
+    }
+
+    async function showTextMessage() {
+      app.innerHTML = '';
+      await sleep(2000);
+      const msg = document.createElement('div');
+      msg.className = 'glow-text';
+      msg.textContent = "You’ve been really lazy this year, but you still found lots of happiness! So, happy birthday again—now go enjoy it like a boss!";
+      app.appendChild(msg);
+      await sleep(8000);
+      app.innerHTML = '';
+    }
+
+    async function hahaEmojis() {
+      const faces = ['😂', '🤣', '😹', '😆', '😁', '😜'];
+      for (let face of faces) {
+        app.innerHTML = `<div class="emoji">${face}</div>`;
+        hahaAudio.currentTime = 0;
+        hahaAudio.play();
+        await sleep(800);
+      }
+      await sleep(2000);
+    }
+
+    async function finalBirthdayScene() {
+      app.innerHTML = '';
+      await sleep(2000);
+      const final = document.createElement('div');
+      final.className = 'glow-text';
+      final.textContent = '🎉 Happy Birthday 🎉';
+      final.style.background = 'linear-gradient(to right, #000, #111)';
+      app.appendChild(final);
+
+      const cake = document.createElement('div');
+      cake.textContent = '🎂';
+      cake.style.fontSize = '20vw';
+      app.appendChild(cake);
+
+      await sleep(4000);
+
+      app.innerHTML = '';
+      const gift = document.createElement('div');
+      gift.className = 'gift';
+      app.appendChild(gift);
+
+      gift.onclick = () => {
+        hahaAudio.play();
+        app.innerHTML = `
+          <div class="glow-text">🎊 Here's your birthday gift 🎊</div>
+          <div style="font-size:4em;">🎁🎈🎉🎂🎶</div>
+          <div class="glow-text">Bye Bye 👋</div>
+        `;
+        setTimeout(() => {
+          window.close();
+        }, 7000);
+      };
+    }
+
+    // Start the timeline
+    (async () => {
+      await prankGame();
+      await playVideo();
+      await birthdayCelebrate();
+      await showEmojis();
+      await showTextMessage();
+      await hahaEmojis();
+      await finalBirthdayScene();
+    })();
+  </script>
+</body>
+</html>
